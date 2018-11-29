@@ -8,12 +8,14 @@ import (
 //Bingo bingo
 type Bingo struct {
 	Config IniConfig
+	Logger *BingLog
 }
 
 //New new a bingo
 func New(config string)*Bingo{
 	b := Bingo{}
 	b.Config.Load(config)
+	b.Logger = NewLogger(&b.Config)
 	return &b
 }
 
@@ -31,5 +33,7 @@ func (b *Bingo)Run(r *Router){
 	if port == "" {
 		port = "3000"
 	}
+	b.Logger.Start()
+	
 	http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), r.Router())
 }
