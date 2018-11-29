@@ -33,7 +33,8 @@ func (b *Bingo)Run(r *Router){
 	if port == "" {
 		port = "3000"
 	}
+	r.Logger = b.Logger
 	b.Logger.Start()
-	
+	b.Logger.Info(fmt.Sprintf("running http server %s:%s", host, port))
 	http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), r.Router())
 }

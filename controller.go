@@ -12,12 +12,14 @@ type CtrlInterface interface {
 	Context()*Context
 	Config(string)string
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
+	SetLogger(*BingLog)
 }
 
 //Controller controller
 type Controller struct {
 	Ctx Context
 	conf IniConfig
+	Logger *BingLog
 }
 
 //Init initail the controller
@@ -86,4 +88,9 @@ func (c *Controller)ServeHTTP(w http.ResponseWriter, r *http.Request){
 	default:
 		c.NotFound()
 	}
+}
+
+//SetLogger set logger
+func (c *Controller)SetLogger(bl *BingLog){
+	c.Logger = bl
 }

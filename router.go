@@ -24,6 +24,7 @@ func NewHTTPEntry(path string, c CtrlInterface)*HTTPEntry{
 type Router struct {
 	conf IniConfig
 	router *mux.Router
+	Logger *BingLog
 }
 
 //NewRouter new a router
@@ -35,12 +36,14 @@ func NewRouter()*Router{
 
 //Add add a route
 func (r *Router)Add(path string, c CtrlInterface){
+	c.SetLogger(r.Logger)
 	r.router.Handle(path, c)
 }
 //Register register
 func (r *Router)Register(entries ...*HTTPEntry){
 	for _, entry := range entries{
 		if entry != nil {
+			entry.C.SetLogger(r.Logger)
 			r.router.Handle(entry.PATH, entry.C)
 		}
 	}
