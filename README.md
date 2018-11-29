@@ -26,3 +26,10 @@ func main(){
 	b.Run(router)
 }
 ```
+
+config file
+
+```conf
+    host=0.0.0.0
+    port=8080
+```
