@@ -5,7 +5,7 @@ import (
 )
 //DBMInterface interface for database model
 type DBMInterface interface {
-	Columns()map[string]interface{}
+	Columns()([]string, []interface{})
 }
 
 
@@ -22,5 +22,5 @@ type DBInterface interface {
 	InsertBatch(string, ...interface{})(interface{}, error)
 	Exists(string, ...interface{})(bool, error)
 	UnMarshal(interface{}, ...interface{})error
-	UnMarshalI(interface{}, interface{}, interface{})([]interface{},error)
+	UnMarshalI(interface{}, []string, interface{})([]interface{},error)
 }

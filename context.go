@@ -1,4 +1,4 @@
-package context
+package bingo
 
 import (
 	"net/http"
@@ -13,6 +13,15 @@ type Context struct{
 	Encoding string
 }
 
+func NewContext()*Context{
+	c := Context{
+		Input: NewInput(),
+		Output:NewOutput(),
+		Request: nil,
+		ResponseWriter: nil,
+	}
+	return &c
+}
 
 //Init init context
 func (c *Context)Init(r *http.Request, w http.ResponseWriter){

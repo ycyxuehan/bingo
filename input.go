@@ -1,4 +1,4 @@
-package context
+package bingo
 
 import (
 	"net/url"
@@ -15,7 +15,9 @@ type Input struct {
 	RequestBodyLength int
 	request *http.Request
 }
-
+func NewInput()*Input{
+	return &Input{}
+}
 //Init init
 func (i *Input)Init(r *http.Request){
 	i.request = r

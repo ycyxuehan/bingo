@@ -1,4 +1,4 @@
-package context
+package bingo
 
 import (
 	"fmt"
@@ -11,6 +11,9 @@ type Output struct{
 	response http.ResponseWriter
 }
 
+func NewOutput()*Output{
+	return &Output{}
+}
 //Init init output
 func (o *Output)Init(rw http.ResponseWriter){
 	o.response = rw

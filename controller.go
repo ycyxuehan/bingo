@@ -1,36 +1,45 @@
-package controller
+package bingo
 
 import (
-	"github.com/ycyxuehan/bingo/bingdb"
-	"github.com/ycyxuehan/bingo/config"
-	"github.com/ycyxuehan/bingo/logger"
-	"github.com/ycyxuehan/bingo/context"
+	// "reflect"
 	"net/http"
 )
+//Result a result template
+type Result struct{
+	ResultCode int `json:"ResultCode"`
+	ResultString string `json:"ResultString"`
+	ResultData interface{} `json:"ResultData"`
+}
 
 //CtrlInterface controller interface
 type CtrlInterface interface {
 	Init()
 	Release()
-	SetContext(context.Context)
-	Context()*context.Context
+	SetContext(*Context)
+	Context()*Context
 	Config(string)string
+	SetThis(CtrlInterface)
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
-	SetLogger(*logger.BingLog)
-	SetDBI(bingdb.DBInterface)
+	Get()
+	Post()
+	Put()
+	Delete()
 }
 
 //Controller controller
 type Controller struct {
-	Ctx context.Context
-	conf config.IniConfig
-	Logger *logger.BingLog
-	DBI bingdb.DBInterface
+	Ctx *Context
+	this CtrlInterface
 }
 
 //Init initail the controller
 func (c *Controller)Init(){
+	c.Ctx = NewContext()
+}
 
+//SetThis set this
+func (c *Controller)SetThis(ci CtrlInterface){
+	c.this = ci
 }
 
 //Release release the controller
@@ -39,18 +48,18 @@ func (c *Controller)Release(){
 }
 
 //SetContext set controller context
-func (c *Controller)SetContext(ctx context.Context){
+func (c *Controller)SetContext(ctx *Context){
 	c.Ctx = ctx
 }
 
 //Context get context
-func (c *Controller)Context()*context.Context{
-	return &c.Ctx
+func (c *Controller)Context()*Context{
+	return c.Ctx
 }
 
 //Config get a config
 func (c *Controller)Config(key string)string{
-	return c.conf.Get(key)
+	return BingConf.Get(key)
 }
 
 //Get response http get request
@@ -78,30 +87,22 @@ func (c *Controller)NotFound(){
 func (c *Controller)ServeHTTP(w http.ResponseWriter, r *http.Request){
 	c.Init()
 	c.Ctx.Init(r, w)
+	Logger.Info("access %s", c.Ctx.URL())
 	switch r.Method {
 	case "GET":
-		c.Get()
+		c.this.Get()
 		break;
 	case "PUT":
-		c.Put()
+		c.this.Put()
 		break;
 	case "POST":
-		c.Post()
+		c.this.Post()
 		break
 	case "DELETE":
-		c.Delete()
+		c.this.Delete()
 		break
 	default:
 		c.NotFound()
 	}
 }
 
-//SetLogger set logger
-func (c *Controller)SetLogger(bl *logger.BingLog){
-	c.Logger = bl
-}
-
-//SetDBI set db interface
-func (c *Controller)SetDBI(dbi bingdb.DBInterface){
-	c.DBI = dbi
-}
