@@ -16,7 +16,6 @@ type BaseInterface interface{
 //Base base model
 type Base struct {
 	this BaseInterface
-	SaveFilterColumn bool
 }
 
 //SetThis set this
