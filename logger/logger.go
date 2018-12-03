@@ -1,6 +1,7 @@
-package bingo
+package logger
 
 import (
+	"github.com/ycyxuehan/bingo/config"
 	"bufio"
 	"os"
 	"fmt"
@@ -113,8 +114,8 @@ const (
 	MAXSIZE=1024
 )
 
-//NewLogger new a binglog
-func NewLogger(conf *IniConfig)*BingLog{
+//New new a binglog
+func New(conf *config.IniConfig)*BingLog{
 	var level LogLevel = INFO
 	level.Set(conf.Get("loglevel"))
 	bl := BingLog{}
@@ -130,13 +131,13 @@ func NewLogger(conf *IniConfig)*BingLog{
 }
 
 //WriteLog write log
-func (bl *BingLog)WriteLog(log string, level LogLevel){
+func (bl *BingLog)WriteLog(level LogLevel, logFormat string, a ...interface{}){
 	if len(bl.pool) == MAXSIZE {
 		//pool is full, drop the older one
 		<- bl.pool
 	}
 	bl.pool <- LogMessage{
-		Message: log,
+		Message: fmt.Sprintf(logFormat, a),
 		Level: level,
 	}
 }
@@ -207,41 +208,41 @@ func (bl *BingLog)Start(){
 	go bl.thread()
 }
 //Info write info log
-func (bl *BingLog)Info(log string){
-	bl.WriteLog(log, INFO)
+func (bl *BingLog)Info(logFormat string, a ...interface{}){
+	bl.WriteLog(INFO, logFormat, a)
 }
 
 //Notice write info log
-func (bl *BingLog)Notice(log string){
-	bl.WriteLog(log, NOTICE)
+func (bl *BingLog)Notice(logFormat string, a ...interface{}){
+	bl.WriteLog(NOTICE, logFormat, a)
 }
 
 //Warning write info log
-func (bl *BingLog)Warning(log string){
-	bl.WriteLog(log, WARNING)
+func (bl *BingLog)Warning(logFormat string, a ...interface{}){
+	bl.WriteLog(WARNING, logFormat, a)
 }
 
 //Error write info log
-func (bl *BingLog)Error(log string){
-	bl.WriteLog(log, ERROR)
+func (bl *BingLog)Error(logFormat string, a ...interface{}){
+	bl.WriteLog(ERROR, logFormat, a)
 }
 
 //Critical write info log
-func (bl *BingLog)Critical(log string){
-	bl.WriteLog(log, CRITICAL)
+func (bl *BingLog)Critical(logFormat string, a ...interface{}){
+	bl.WriteLog(CRITICAL, logFormat, a)
 }
 
 //Alert write info log
-func (bl *BingLog)Alert(log string){
-	bl.WriteLog(log, ALERT)
+func (bl *BingLog)Alert(logFormat string, a ...interface{}){
+	bl.WriteLog(ALERT, logFormat, a)
 }
 
 //Emergency Emergency info log
-func (bl *BingLog)Emergency(log string){
-	bl.WriteLog(log, EMERGENCY)
+func (bl *BingLog)Emergency(logFormat string, a ...interface{}){
+	bl.WriteLog(EMERGENCY, logFormat, a)
 }
 
 //Debug write info log
-func (bl *BingLog)Debug(log string){
-	bl.WriteLog(log, DEBUG)
+func (bl *BingLog)Debug(logFormat string, a ...interface{}){
+	bl.WriteLog(DEBUG, logFormat, a)
 }

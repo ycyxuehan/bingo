@@ -1,4 +1,4 @@
-package bingo
+package config
 
 import (
 	"strings"

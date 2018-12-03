@@ -1,6 +1,10 @@
-package bingo
+package controller
 
 import (
+	"github.com/ycyxuehan/bingo/bingdb"
+	"github.com/ycyxuehan/bingo/config"
+	"github.com/ycyxuehan/bingo/logger"
+	"github.com/ycyxuehan/bingo/context"
 	"net/http"
 )
 
@@ -8,18 +12,20 @@ import (
 type CtrlInterface interface {
 	Init()
 	Release()
-	SetContext(Context)
-	Context()*Context
+	SetContext(context.Context)
+	Context()*context.Context
 	Config(string)string
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
-	SetLogger(*BingLog)
+	SetLogger(*logger.BingLog)
+	SetDBI(bingdb.DBInterface)
 }
 
 //Controller controller
 type Controller struct {
-	Ctx Context
-	conf IniConfig
-	Logger *BingLog
+	Ctx context.Context
+	conf config.IniConfig
+	Logger *logger.BingLog
+	DBI bingdb.DBInterface
 }
 
 //Init initail the controller
@@ -33,12 +39,12 @@ func (c *Controller)Release(){
 }
 
 //SetContext set controller context
-func (c *Controller)SetContext(ctx Context){
+func (c *Controller)SetContext(ctx context.Context){
 	c.Ctx = ctx
 }
 
 //Context get context
-func (c *Controller)Context()*Context{
+func (c *Controller)Context()*context.Context{
 	return &c.Ctx
 }
 
@@ -91,6 +97,11 @@ func (c *Controller)ServeHTTP(w http.ResponseWriter, r *http.Request){
 }
 
 //SetLogger set logger
-func (c *Controller)SetLogger(bl *BingLog){
+func (c *Controller)SetLogger(bl *logger.BingLog){
 	c.Logger = bl
+}
+
+//SetDBI set db interface
+func (c *Controller)SetDBI(dbi bingdb.DBInterface){
+	c.DBI = dbi
 }

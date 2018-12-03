@@ -1,4 +1,4 @@
-package bingo
+package context
 
 import (
 	"net/http"

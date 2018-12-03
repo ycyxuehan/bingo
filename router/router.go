@@ -1,6 +1,10 @@
-package bingo
+package router
 
 import (
+	"github.com/ycyxuehan/bingo/bingdb"
+	"github.com/ycyxuehan/bingo/logger"
+	"github.com/ycyxuehan/bingo/config"
+	"github.com/ycyxuehan/bingo/controller"
 	"github.com/gorilla/mux"
 	"net/http"
 
@@ -8,10 +12,10 @@ import (
 //HTTPEntry httpentry
 type HTTPEntry struct{
 	PATH string
-	C CtrlInterface
+	C controller.CtrlInterface
 }
 //NewHTTPEntry new HTTPEntry
-func NewHTTPEntry(path string, c CtrlInterface)*HTTPEntry{
+func NewHTTPEntry(path string, c controller.CtrlInterface)*HTTPEntry{
 	if path == "" || c == nil{
 		return nil
 	}
@@ -22,9 +26,10 @@ func NewHTTPEntry(path string, c CtrlInterface)*HTTPEntry{
 }
 //Router router
 type Router struct {
-	conf IniConfig
+	conf config.IniConfig
 	router *mux.Router
-	Logger *BingLog
+	Logger *logger.BingLog
+	DBI bingdb.DBInterface
 }
 
 //NewRouter new a router
@@ -35,8 +40,9 @@ func NewRouter()*Router{
 }
 
 //Add add a route
-func (r *Router)Add(path string, c CtrlInterface){
+func (r *Router)Add(path string, c controller.CtrlInterface){
 	c.SetLogger(r.Logger)
+	c.SetDBI(r.DBI)
 	r.router.Handle(path, c)
 }
 //Register register
@@ -44,6 +50,7 @@ func (r *Router)Register(entries ...*HTTPEntry){
 	for _, entry := range entries{
 		if entry != nil {
 			entry.C.SetLogger(r.Logger)
+			entry.C.SetDBI(r.DBI)
 			r.router.Handle(entry.PATH, entry.C)
 		}
 	}
