@@ -1,6 +1,7 @@
 package bingo
 
 import (
+	"github.com/gorilla/mux"
 	"net/url"
 	"net/http"
 	"strings"
@@ -24,6 +25,10 @@ func (i *Input)Init(r *http.Request){
 	p, e := url.ParseQuery(r.URL.RawQuery)
 	if e == nil {
 		i.Param = p
+	}
+	vars := mux.Vars(r)
+	for key, val := range vars {
+		i.Param.Set(key, val)
 	}
 	if i.IsPost() {
 		reader := r.Body

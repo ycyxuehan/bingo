@@ -73,7 +73,8 @@ func (m *MySQL)Select(table string, filter interface{}, args ...interface{})(int
 		return nil, fmt.Errorf("db not connect")
 	}
 	query := ""
-	if cols, _ := m.columns(args); len(cols)>0 {
+	cols, _ := m.columns(args...)
+	if len(cols)>0 {
 		query = fmt.Sprintf("select %s from %s where 1=1 ", strings.Join(cols, ","), table)
 	} else {
 		query = fmt.Sprintf("select * from %s where 1=1 ", table)
@@ -83,9 +84,10 @@ func (m *MySQL)Select(table string, filter interface{}, args ...interface{})(int
 		for _, i := range filterI {
 			args = append(args, i)
 		}
-		query = fmt.Sprintf("%s and %s %s;", query, strings.Join(filterStr, " and"), m.limit(args))
+		query = fmt.Sprintf("%s and %s", query, strings.Join(filterStr, " and"))
 	}
-	return m.db.Query(query, args...)
+	query = fmt.Sprintf("%s %s;", query, m.limit(args...))
+	return m.db.Query(query, filterI...)
 }
 
 //Marshal interface to sql
@@ -117,27 +119,17 @@ func (m *MySQL)UnMarshalI(src interface{}, columns []string, dest interface{})([
 			}
 			return nil, row.Scan(destCols...)
 		}
-	}
-	if rows, ok := src.(*sql.Rows); ok {
+	}else if rows, ok := src.(*sql.Rows); ok {
 		res := []interface{}{}
 		t := reflect.TypeOf(dest)
-		// res := reflect.ArrayOf(1, i)
 		for rows.Next(){
-			nv := reflect.New(t)
+			nv := reflect.New(t.Elem()).Interface()
 			colIs := []interface{}{}
-			if columns == nil || len(columns) == 0 {
-				if destI, ok := dest.(bingdb.DBMInterface); ok {
-					
-					columns, _ = destI.Columns()
-				}
+			if mbi, ok := nv.(bingdb.DBMInterface); ok {
+				_, colIs = mbi.Columns()
+				rows.Scan(colIs...)
+				res = append(res, nv)
 			}
-			for _, col := range columns {
-				colIs = append(colIs, nv.Elem().FieldByName(col).Interface())
-			}
-
-			rows.Scan(colIs...)
-			res = append(res, nv.Interface())
-			// t := reflect.
 		}
 		return res, nil	
 	}
@@ -150,7 +142,7 @@ func (m *MySQL)Update(table string,filter interface{}, args ...interface{})(inte
 		return nil, fmt.Errorf("db not connect")
 	}
 	query := ""
-	cols, vals := m.columns(args)
+	cols, vals := m.columns(args...)
 	if  len(cols)>0 {
 		query = fmt.Sprintf("update %s set %s where 1=1 ", table, strings.Join(cols, "=?,"))
 	} else {
@@ -172,7 +164,7 @@ func (m *MySQL)Insert(table string, args ...interface{})(interface{}, error){
 		return nil, fmt.Errorf("db not connect")
 	}
 	query := ""
-	cols, vals := m.columns(args);
+	cols, vals := m.columns(args...);
 	if len(cols)>0 {
 		tmp := []string{}
 		for range cols {
@@ -272,6 +264,11 @@ func (m *MySQL)filter(f interface{})([]string, []interface{}){
 	resStr := []string{}
 	resI := []interface{}{}
 	if filter, ok :=f.(Filter); ok {
+		for key, val := range filter {
+			resStr = append(resStr, fmt.Sprintf("%s=?", key))
+			resI = append(resI, val)
+		}
+	}else if filter, ok :=f.(map[string]interface{}); ok {
 		for key, val := range filter {
 			resStr = append(resStr, fmt.Sprintf("%s=?", key))
 			resI = append(resI, val)
