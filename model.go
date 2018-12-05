@@ -27,8 +27,8 @@ func (b *Model)Exists(dbi bingdb.DBInterface)bool{
 	if b.this == nil {
 		return false
 	}
-	exists, err := dbi.Exists(b.this.Table(), b.this)
-	return exists && err == nil
+	count, err := dbi.Count(b.this.Table(), b.this.Filter())
+	return count >0 && err == nil
 }
 //Table return database table name
 func (b *Model)Table()string{

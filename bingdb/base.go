@@ -20,7 +20,7 @@ type DBInterface interface {
 	Insert(string, ...interface{})(interface{}, error)
 	Delete(string, ...interface{})(interface{}, error)
 	InsertBatch(string, ...interface{})(interface{}, error)
-	Exists(string, ...interface{})(bool, error)
+	Count(string, interface{})(int, error)
 	UnMarshal(interface{}, ...interface{})error
 	UnMarshalI(interface{}, []string, interface{})([]interface{},error)
 }

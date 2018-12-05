@@ -87,7 +87,7 @@ func (c *Controller)NotFound(){
 func (c *Controller)ServeHTTP(w http.ResponseWriter, r *http.Request){
 	c.Init()
 	c.Ctx.Init(r, w)
-	Logger.Info("access %s", c.Ctx.URL())
+	Logger.Info("[%s] %s",r.Method, c.Ctx.URL())
 	switch r.Method {
 	case "GET":
 		c.this.Get()
@@ -96,6 +96,7 @@ func (c *Controller)ServeHTTP(w http.ResponseWriter, r *http.Request){
 		c.this.Put()
 		break;
 	case "POST":
+		Logger.Info("test")
 		c.this.Post()
 		break
 	case "DELETE":

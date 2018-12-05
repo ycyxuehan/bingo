@@ -1,6 +1,7 @@
 package bingo
 
 import (
+	"io/ioutil"
 	"github.com/gorilla/mux"
 	"net/url"
 	"net/http"
@@ -30,9 +31,10 @@ func (i *Input)Init(r *http.Request){
 	for key, val := range vars {
 		i.Param.Set(key, val)
 	}
-	if i.IsPost() {
-		reader := r.Body
-		i.RequestBodyLength, _ = reader.Read(i.RequestBody)
+	if i.IsPost() || i.IsPut() {
+		defer r.Body.Close()
+		i.RequestBody , _ = ioutil.ReadAll(r.Body)
+		i.RequestBodyLength = len(i.RequestBody)
 	}
 }
 
@@ -45,6 +47,12 @@ func (i *Input)Is(method string)bool{
 func (i *Input)IsPost()bool{
 	return i.Is("POST")
 }
+
+//IsPut is this a POST method request
+func (i *Input)IsPut()bool{
+	return i.Is("PUT")
+}
+
 
 //Cookie get the cookie
 func (i *Input)Cookie(key string)string{

@@ -144,7 +144,7 @@ func (m *MySQL)Update(table string,filter interface{}, args ...interface{})(inte
 	query := ""
 	cols, vals := m.columns(args...)
 	if  len(cols)>0 {
-		query = fmt.Sprintf("update %s set %s where 1=1 ", table, strings.Join(cols, "=?,"))
+		query = fmt.Sprintf("update %s set %s =? where 1=1 ", table, strings.Join(cols, "=?,"))
 	} else {
 		return nil, fmt.Errorf("no column need to update")
 	}
@@ -247,16 +247,20 @@ func (m *MySQL)exec(query string, args ...interface{})(sql.Result, error){
 	return res, tx.Commit()
 }
 
-//Exists is the record in database
-func (m *MySQL)Exists(table string, args ...interface{})(bool, error){
-	row, err := m.SelectOne(table, args, args...)
-	if err != nil {
-		return false, err
+//Count is the record in database
+func (m *MySQL)Count(table string, filter interface{})(int, error){
+	count := -1
+	if m.db == nil {
+		return count, fmt.Errorf("db not connect")
 	}
-	if _, ok := row.(*sql.Row); ok {
-		return true, nil
+	query := fmt.Sprintf("select count(1) from %s where 1=1 ", table)
+	filterStr, filterI := m.filter(filter)
+	if len(filterStr) > 0 {
+		query = fmt.Sprintf("%s and %s limit 1;", query, strings.Join(filterStr, " and"))
 	}
-	return false, nil
+	row := m.db.QueryRow(query, filterI...)
+	err := row.Scan(&count)
+	return count, err
 }
 
 //
