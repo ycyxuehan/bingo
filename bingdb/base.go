@@ -23,4 +23,5 @@ type DBInterface interface {
 	Count(string, interface{})(int, error)
 	UnMarshal(interface{}, ...interface{})error
 	UnMarshalI(interface{}, []string, interface{})([]interface{},error)
+	Query(string, ...interface{})(interface{}, error)
 }

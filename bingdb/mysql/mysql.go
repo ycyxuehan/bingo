@@ -323,3 +323,10 @@ func (m *MySQL)columnsMap(cols []string, vals []interface{})map[string]interface
 	}
 	return colsMap
 }
+
+func (m *MySQL)Query(query string, args ...interface{})(interface{}, error){
+	if strings.Index(strings.ToLower(query), "select") != -1 {
+		return m.db.Query(query, args...)
+	}
+	return m.exec(query, args...)
+}
