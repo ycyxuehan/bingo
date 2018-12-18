@@ -85,6 +85,10 @@ func (c *Context)ServeString(body string)error{
 	return c.Output.ServeString(body, c.Encoding)
 }
 
+//AjaxResponse response ajax format data
+func (c *Context)AjaxResponse(code int, res string, object interface{})error{
+	return c.ServeJSON(Result{ResultCode:code, ResultString: res, ResultData:object})
+}
 //Reset reset
 func (c *Context)Reset(){
 	c.Input.Reset()
