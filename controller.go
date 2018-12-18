@@ -96,7 +96,6 @@ func (c *Controller)ServeHTTP(w http.ResponseWriter, r *http.Request){
 		c.this.Put()
 		break;
 	case "POST":
-		Logger.Info("test")
 		c.this.Post()
 		break
 	case "DELETE":

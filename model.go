@@ -1,6 +1,7 @@
 package bingo
 
 import (
+	"encoding/json"
 	"github.com/ycyxuehan/bingo/bingdb"
 	"fmt"
 )
@@ -10,6 +11,7 @@ type ModelInterface interface{
 	Table()string
 	Filter()map[string]interface{}
 	Columns()([]string, []interface{})
+	Show()string
 }
 
 //Base base model
@@ -86,5 +88,14 @@ func List(dbi bingdb.DBInterface, filter map[string]interface{}, bi ModelInterfa
 	cols, _ := bi.Columns()
 	res, err := dbi.UnMarshalI(rows, cols, bi)
 	return res, err
+}
+
+func (m *Model)Show()string{
+	var data []byte
+	err := json.Unmarshal(data, m.this)
+	if err != nil {
+		return err.Error()
+	}
+	return string(data)
 }
 

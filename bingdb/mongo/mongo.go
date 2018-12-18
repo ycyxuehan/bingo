@@ -96,18 +96,7 @@ func (m *Mongo)Insert(table string, args ...interface{})(interface{},error){
 		return nil, fmt.Errorf("table name is empty")
 	}
 	collection := m.Database.C(table)
-	datas := []bson.M{}
-	for _, arg := range args {
-		data := bson.M{}
-		if a, ok := arg.(bingdb.DBMInterface); ok {
-			cols, vals := a.Columns()
-			for i, col := range cols{
-				data[col] = vals[i]
-			}
-			datas = append(datas, bson.M{"set":data})
-		}
-	}
-	err := collection.Insert(datas)
+	err := collection.Insert(args...)
 	return nil, err
 }
 
