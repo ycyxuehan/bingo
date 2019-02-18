@@ -1,6 +1,9 @@
 package bingo
 
 import (
+	"syscall"
+	"os/signal"
+	"os"
 	"strings"
 	"github.com/ycyxuehan/bingo/bingdb/mysql"
 	"github.com/ycyxuehan/bingo/bingdb"
@@ -65,4 +68,50 @@ func Run(){
 
 func RegisterRoute(entries ...*HTTPEntry){
 	App.RegisterRoute(entries...)
+}
+
+func Daemon(){
+	pidfile := BingConf.Get("pid")
+	if pidfile == "" {
+		pidfile = fmt.Sprintf("/var/lib/%s", BingConf.Get("appname"))
+	}
+	File, err := os.OpenFile(pidfile, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		Logger.Error("write pid file error: ", err)
+		return
+	}
+	info, _ := File.Stat()
+	if info.Size() != 0{
+		Logger.Error("pid file is exist.")
+		return
+	}
+	if os.Getppid() != 1 {
+		args := append([]string{os.Args[0]}, os.Args[1:]...)
+		os.StartProcess(os.Args[0], args, &os.ProcAttr{Files: []*os.File{os.Stdin, os.Stdout, os.Stderr}})
+		return
+	}
+	File.WriteString(fmt.Sprint(os.Getpid()))
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGUSR2)
+	go App.Run()
+	for {
+		sign := <- signalChan
+		switch sign {
+		case syscall.SIGUSR2:
+			//user customer signal 2
+		case os.Interrupt:
+			//safety exit
+			Exit(File)
+			break
+		}
+	}
+}
+
+func Exit(F *os.File){
+	err := F.Close()
+	if err != nil {
+		fmt.Println("close pid file error: %s", err)
+	}
+	os.Remove(F.Name())
+
 }
